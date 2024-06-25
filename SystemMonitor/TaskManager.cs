@@ -4,21 +4,14 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Threading;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.Devices;
 using SystemMonitor;
 
 namespace TaskManager
 {
     public partial class TaskManagerMain : Form
     {
-        // Импортируем функцию из User32.dll для регистрации горячих клавиш
-        [DllImport("User32.dll")]
-        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
-
-        [DllImport("User32.dll")]
-        public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
         // Модификаторы клавиш
         private const int MOD_ALT = 0x1;
         private const int MOD_CONTROL = 0x2;
@@ -29,8 +22,8 @@ namespace TaskManager
         private const int HOTKEY_ID = 1;
 
         private PerformanceCounter cpuCounter;
+        private bool isTray;
         private PerformanceCounter ramCounter;
-        private bool isTray = false;
 
         public TaskManagerMain(string[] args)
         {
@@ -39,9 +32,15 @@ namespace TaskManager
             PopulateProcessList();
 
 
-                RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL | MOD_SHIFT, (int)Keys.T);
+            RegisterHotKey(Handle, HOTKEY_ID, MOD_CONTROL | MOD_SHIFT, (int)Keys.T);
         }
 
+        // Импортируем функцию из User32.dll для регистрации горячих клавиш
+        [DllImport("User32.dll")]
+        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+
+        [DllImport("User32.dll")]
+        public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
 
         private void InitializePerformanceCounters()
@@ -57,10 +56,10 @@ namespace TaskManager
             listViewProcesses.Columns.Add("CPU", 70, HorizontalAlignment.Left);
             listViewProcesses.Columns.Add("Memory (MB)", 100, HorizontalAlignment.Left);
 
-            Process[] processes = Process.GetProcesses();
-            foreach (Process process in processes)
+            var processes = Process.GetProcesses();
+            foreach (var process in processes)
             {
-                ListViewItem item = new ListViewItem(process.ProcessName);
+                var item = new ListViewItem(process.ProcessName);
                 item.SubItems.Add(process.Id.ToString());
                 item.SubItems.Add("0");
                 item.SubItems.Add("0");
@@ -80,34 +79,33 @@ namespace TaskManager
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            float cpuUsage = cpuCounter.NextValue();
-            float ramUsage = ramCounter.NextValue();
+            var cpuUsage = cpuCounter.NextValue();
+            var ramUsage = ramCounter.NextValue();
 
             progressBarCPU.Value = (int)cpuUsage;
-            progressBarRAM.Value = (int)(((GetTotalMemory() - ramUsage) / GetTotalMemory()) * 100);
+            progressBarRAM.Value = (int)((GetTotalMemory() - ramUsage) / GetTotalMemory() * 100);
 
             labelCPU.Text = $"CPU using: {cpuUsage:F1}%";
             labelRAM.Text = $"RAM using: {GetTotalMemory() - ramUsage:F0} MB / {GetTotalMemory()} MB";
 
             if (checkBox1.Checked)
                 UpdateProcessList();
-
         }
 
         private void UpdateProcessList()
         {
-
             listViewProcesses.Items.Clear();
 
-            Process[] processes = Process.GetProcesses();
-            foreach (Process process in processes)
+            var processes = Process.GetProcesses();
+            foreach (var process in processes)
             {
                 float cpuUsage = 0;
                 float ramUsage = 0;
 
                 try
                 {
-                    cpuUsage = (float)Math.Round((process.TotalProcessorTime.TotalMilliseconds / Environment.ProcessorCount) / 10, 1);
+                    cpuUsage = (float)Math.Round(
+                        process.TotalProcessorTime.TotalMilliseconds / Environment.ProcessorCount / 10, 1);
                     ramUsage = process.WorkingSet64 / (1024 * 1024);
                 }
                 catch
@@ -115,7 +113,7 @@ namespace TaskManager
                     continue;
                 }
 
-                ListViewItem item = new ListViewItem(process.ProcessName);
+                var item = new ListViewItem(process.ProcessName);
 
                 item.SubItems.Add(process.Id.ToString());
 
@@ -123,80 +121,80 @@ namespace TaskManager
                 item.SubItems.Add($"{ramUsage:F1}");
 
                 listViewProcesses.Items.Add(item);
-
-
             }
+
             listViewProcesses.Sort();
         }
 
 
-        private float GetTotalMemory() => new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / (1024 * 1024);
+        private float GetTotalMemory()
+        {
+            return new ComputerInfo().TotalPhysicalMemory / (1024 * 1024);
+        }
 
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (!IsRunningAsAdmin())
             {
-                DialogResult RestartRunAs = MessageBox.Show
-                    (
+                var RestartRunAs = MessageBox.Show
+                (
                     "No administrator permision.\n Restart with Administrator permision?",
                     "Error",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Information
-                    );
-                if (RestartRunAs == DialogResult.Yes)
-                {
-                    RestartAsAdmin();
-                }
+                );
+                if (RestartRunAs == DialogResult.Yes) RestartAsAdmin();
                 return;
             }
+
             if (listViewProcesses.SelectedItems.Count > 0)
             {
-                int processId = int.Parse(listViewProcesses.SelectedItems[0].SubItems[1].Text);
+                var processId = int.Parse(listViewProcesses.SelectedItems[0].SubItems[1].Text);
                 try
                 {
                     Process.GetProcessById(processId).Kill();
-
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show
-                        (
+                    (
                         $"Failed to kill process: {ex.Message}",
                         "Error",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
-                        );
+                    );
                 }
+
                 listViewProcesses.Items.Remove(listViewProcesses.SelectedItems[0]);
                 UpdateProcessList();
-
             }
             else
             {
                 MessageBox.Show
-                    (
+                (
                     "Please select a process to kill.",
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
-                    );
+                );
             }
-
         }
 
-        private void button2_Click(object sender, EventArgs e) =>
+        private void button2_Click(object sender, EventArgs e)
+        {
             UpdateProcessList();
+        }
 
         private bool IsRunningAsAdmin()
         {
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
+
         private void RestartAsAdmin()
         {
-
             var name = Process.GetCurrentProcess().MainModule.FileName;
             var startInfo = new ProcessStartInfo(name) { Verb = "runas" };
             try
@@ -207,17 +205,16 @@ namespace TaskManager
             }
             catch (Exception ex)
             {
-                DialogResult dr = MessageBox.Show
-                    (
+                var dr = MessageBox.Show
+                (
                     $"An error has occurred.\n Details:\n{ex} \n Try again?",
                     "Error.",
-                    buttons: MessageBoxButtons.YesNo
-                    );
+                    MessageBoxButtons.YesNo
+                );
 
                 if (dr == DialogResult.Yes)
                     RestartAsAdmin();
             }
-
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -228,14 +225,16 @@ namespace TaskManager
 
         private void createTaskToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CreateTask createTask = new CreateTask();
+            var createTask = new CreateTask();
             createTask.ShowDialog();
         }
 
         private void TaskManager_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (isTray)
+            {
                 Application.Exit();
+            }
 
             else
             {
@@ -248,24 +247,6 @@ namespace TaskManager
 
 
 
-        private void resumeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!IsRunningAsAdmin())
-            {
-                DialogResult RestartRunAs = MessageBox.Show
-                    (
-                    "No administrator permision.\n Restart with Administrator permision?",
-                    "Error",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Information
-                    );
-                if (RestartRunAs == DialogResult.Yes)
-                    RestartAsAdmin();
-
-                return;
-            }
-
-        }
 
 
         private void restartAsAdminToolStripMenuItem_Click(object sender, EventArgs e)
@@ -275,22 +256,23 @@ namespace TaskManager
                 MessageBox.Show(
                     "The program is already running as administrator",
                     "Error"
-                    );
+                );
                 return;
             }
+
             RestartAsAdmin();
         }
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            this.Show();
+            Show();
             notifyIcon1.Visible = false;
             WindowState = FormWindowState.Normal;
         }
 
         private void hideToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             notifyIcon1.Visible = true;
             notifyIcon1.ShowBalloonTip(1000);
         }
@@ -301,41 +283,42 @@ namespace TaskManager
             Application.Exit();
         }
 
-        private void showToolStripMenuItem_Click(object sender, EventArgs e) =>
+        private void showToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             notifyIcon1_MouseDoubleClick(null, null);
+        }
 
 
         private void createTaskToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            CreateTask createTask = new CreateTask();
+            var createTask = new CreateTask();
             createTask.Show();
         }
 
         private void widgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TaskManagerForm taskManagerForm = new TaskManagerForm();
+            var taskManagerForm = new TaskManagerForm();
             taskManagerForm.Show();
             isTray = true;
-            this.Hide();
+            Hide();
         }
+
         private void takeown()
         {
-            string resourceName = "InstallTakeOwnership.reg";
-            string tempFilePath = Path.GetTempFileName() + ".reg";
+            var resourceName = "InstallTakeOwnership.reg";
+            var tempFilePath = Path.GetTempFileName() + ".reg";
 
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
-                if (stream == null)
-                {
-                    throw new Exception("Resource not found: " + resourceName);
-                }
+                if (stream == null) throw new Exception("Resource not found: " + resourceName);
 
-                using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
+                using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
                 {
                     stream.CopyTo(fileStream);
                 }
             }
-            Process process = new Process();
+
+            var process = new Process();
             process.StartInfo.FileName = "regedit.exe";
             process.StartInfo.Arguments = "/s " + tempFilePath;
             process.Start();
@@ -350,32 +333,27 @@ namespace TaskManager
                 takeown();
                 return;
             }
-            DialogResult RestartRunAs = MessageBox.Show
-                (
+
+            var RestartRunAs = MessageBox.Show
+            (
                 "No administrator permision.\n Restart with Administrator permision?",
                 "Error",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Information
-                );
-            if (RestartRunAs == DialogResult.Yes)
-            {
-                RestartAsAdmin();
-            }
-            return;
+            );
+            if (RestartRunAs == DialogResult.Yes) RestartAsAdmin();
         }
 
-        private void restartAsAdminToolStripMenuItem1_Click(object sender, EventArgs e) =>
+        private void restartAsAdminToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
             restartAsAdminToolStripMenuItem.PerformClick();
+        }
 
         protected override void WndProc(ref Message m)
         {
             const int WM_HOTKEY = 0x0312;
-            if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == HOTKEY_ID)
-            {
-                createTaskToolStripMenuItem.PerformClick();
-            }
+            if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == HOTKEY_ID) createTaskToolStripMenuItem.PerformClick();
             base.WndProc(ref m);
         }
-
     }
 }

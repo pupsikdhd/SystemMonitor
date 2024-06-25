@@ -30,7 +30,6 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSplitButton1 = new System.Windows.Forms.ToolStripSplitButton();
             this.createTaskToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.takeOwnershipToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartAsAdminToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.widgetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -38,11 +37,11 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.restartAsAdminToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.createTaskToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.restartAsAdminToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
@@ -152,7 +151,6 @@
             this.toolStripSplitButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripSplitButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.createTaskToolStripMenuItem,
-            this.takeOwnershipToolStripMenuItem,
             this.restartAsAdminToolStripMenuItem,
             this.widgetToolStripMenuItem,
             this.hideToolStripMenuItem,
@@ -169,13 +167,6 @@
             this.createTaskToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.createTaskToolStripMenuItem.Text = "Create task";
             this.createTaskToolStripMenuItem.Click += new System.EventHandler(this.createTaskToolStripMenuItem_Click);
-            // 
-            // takeOwnershipToolStripMenuItem
-            // 
-            this.takeOwnershipToolStripMenuItem.Name = "takeOwnershipToolStripMenuItem";
-            this.takeOwnershipToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.takeOwnershipToolStripMenuItem.Text = "Take ownership";
-            this.takeOwnershipToolStripMenuItem.Click += new System.EventHandler(this.takeOwnershipToolStripMenuItem_Click);
             // 
             // restartAsAdminToolStripMenuItem
             // 
@@ -231,39 +222,39 @@
             this.showToolStripMenuItem,
             this.exitToolStripMenuItem1});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(181, 114);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(162, 92);
+            // 
+            // restartAsAdminToolStripMenuItem1
+            // 
+            this.restartAsAdminToolStripMenuItem1.Name = "restartAsAdminToolStripMenuItem1";
+            this.restartAsAdminToolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
+            this.restartAsAdminToolStripMenuItem1.Text = "Restart as admin";
+            this.restartAsAdminToolStripMenuItem1.Click += new System.EventHandler(this.restartAsAdminToolStripMenuItem1_Click);
             // 
             // createTaskToolStripMenuItem1
             // 
             this.createTaskToolStripMenuItem1.Name = "createTaskToolStripMenuItem1";
-            this.createTaskToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.createTaskToolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.createTaskToolStripMenuItem1.Text = "Create task";
             this.createTaskToolStripMenuItem1.Click += new System.EventHandler(this.createTaskToolStripMenuItem1_Click);
             // 
             // showToolStripMenuItem
             // 
             this.showToolStripMenuItem.Name = "showToolStripMenuItem";
-            this.showToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.showToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.showToolStripMenuItem.Text = "Show";
             this.showToolStripMenuItem.Click += new System.EventHandler(this.showToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem1
             // 
             this.exitToolStripMenuItem1.Name = "exitToolStripMenuItem1";
-            this.exitToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.exitToolStripMenuItem1.Text = "Exit";
             this.exitToolStripMenuItem1.Click += new System.EventHandler(this.exitToolStripMenuItem1_Click);
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // restartAsAdminToolStripMenuItem1
-            // 
-            this.restartAsAdminToolStripMenuItem1.Name = "restartAsAdminToolStripMenuItem1";
-            this.restartAsAdminToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.restartAsAdminToolStripMenuItem1.Text = "Restart as admin";
-            this.restartAsAdminToolStripMenuItem1.Click += new System.EventHandler(this.restartAsAdminToolStripMenuItem1_Click);
             // 
             // TaskManagerMain
             // 
@@ -317,7 +308,6 @@
         private System.Windows.Forms.ToolStripMenuItem showToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createTaskToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem widgetToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem takeOwnershipToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripMenuItem restartAsAdminToolStripMenuItem1;
     }
